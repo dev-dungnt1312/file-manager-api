@@ -40,6 +40,22 @@ async function api(path, options = {}) {
   return res;
 }
 
+async function authorizedFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'x-api-token': state.apiToken,
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res;
+}
+
+function fileUrl(path) {
+  return `${state.apiBaseUrl}/projects/${state.project.id}/files/content?path=${encodeURIComponent(path)}`;
+}
+
 function renderProjects() {
   $('projectList').innerHTML = state.projects.map((project) => `
     <div class="project-item ${state.project?.id === project.id ? 'active' : ''}" data-id="${project.id}">
@@ -80,6 +96,82 @@ function parentPath(path) {
   return parts.join('/');
 }
 
+function extname(path) {
+  return path.toLowerCase().split('.').pop() || '';
+}
+
+function isImage(path) {
+  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(extname(path));
+}
+
+function isText(path) {
+  return ['txt', 'md', 'json', 'js', 'ts', 'tsx', 'jsx', 'css', 'html', 'xml', 'yml', 'yaml', 'log'].includes(extname(path));
+}
+
+function closePreview() {
+  $('previewModal').classList.add('hidden');
+  $('previewBody').innerHTML = '';
+}
+
+async function openPreview(item) {
+  if (!state.project) return;
+  $('previewTitle').textContent = item.name;
+  $('previewMeta').textContent = `${item.path} • ${item.type} • ${formatSize(item.size)}`;
+  $('previewBody').innerHTML = '<div class="muted">Loading preview...</div>';
+  $('previewModal').classList.remove('hidden');
+
+  try {
+    const url = fileUrl(item.path);
+    if (isImage(item.path)) {
+      const res = await authorizedFetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      $('previewBody').innerHTML = `
+        <div class="preview-actions">
+          <a href="${objectUrl}" target="_blank">Open image</a>
+        </div>
+        <img src="${objectUrl}" alt="${item.name}" />
+      `;
+      return;
+    }
+
+    if (isText(item.path)) {
+      const res = await authorizedFetch(url);
+      const text = await res.text();
+      $('previewBody').innerHTML = `
+        <div class="preview-actions">
+          <button id="copyPreviewBtn" class="secondary">Copy content</button>
+        </div>
+        <pre></pre>
+      `;
+      $('previewBody').querySelector('pre').textContent = text;
+      $('copyPreviewBtn').onclick = async () => {
+        await navigator.clipboard.writeText(text);
+        log('Copied preview content');
+      };
+      return;
+    }
+
+    $('previewBody').innerHTML = `
+      <div class="preview-actions">
+        <button id="downloadPreviewBtn">Download file</button>
+      </div>
+      <div class="muted">Preview is not available for this file type yet.</div>
+    `;
+    $('downloadPreviewBtn').onclick = async () => {
+      const res = await authorizedFetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = item.name;
+      a.click();
+    };
+  } catch (error) {
+    $('previewBody').innerHTML = `<div class="muted">Preview error: ${error.message}</div>`;
+  }
+}
+
 async function loadProjects() {
   saveConfig();
   const data = await api('/projects');
@@ -103,7 +195,9 @@ async function loadFiles(path = state.currentPath) {
       <td>${formatSize(item.size)}</td>
       <td>${item.lastModified || '-'}</td>
       <td>
-        ${item.type === 'directory' ? `<button class="secondary open-btn" data-path="${item.path}">Open</button>` : `<a href="${state.apiBaseUrl}/projects/${state.project.id}/files/content?path=${encodeURIComponent(item.path)}" target="_blank">View</a>`}
+        ${item.type === 'directory'
+          ? `<button class="secondary open-btn" data-path="${item.path}">Open</button>`
+          : `<button class="secondary preview-btn" data-path="${item.path}">Preview</button>`}
         <button class="secondary fill-delete-btn" data-path="${item.path}">Delete</button>
       </td>
     </tr>
@@ -111,6 +205,12 @@ async function loadFiles(path = state.currentPath) {
 
   document.querySelectorAll('.open-btn').forEach((btn) => btn.addEventListener('click', () => loadFiles(btn.dataset.path)));
   document.querySelectorAll('.fill-delete-btn').forEach((btn) => btn.addEventListener('click', () => $('deletePath').value = btn.dataset.path));
+  document.querySelectorAll('.preview-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = data.data.find((entry) => entry.path === btn.dataset.path);
+      if (item) openPreview(item);
+    });
+  });
   log('Loaded files', { path: state.currentPath, count: data.data.length });
 }
 
@@ -161,6 +261,8 @@ function bind() {
   $('moveBtn').onclick = () => moveFile().catch((e) => log(`Error: ${e.message}`));
   $('copyBtn').onclick = () => copyFile().catch((e) => log(`Error: ${e.message}`));
   $('deleteBtn').onclick = () => deleteFile().catch((e) => log(`Error: ${e.message}`));
+  $('previewCloseBtn').onclick = closePreview;
+  $('previewCloseBackdrop').onclick = closePreview;
 }
 
 bind();
