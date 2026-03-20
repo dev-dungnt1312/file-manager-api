@@ -110,6 +110,9 @@ Default server:
 Swagger UI:
 - `http://127.0.0.1:3000/docs`
 
+Dashboard UI:
+- `http://127.0.0.1:3000/dashboard/`
+
 ---
 
 ## Environment variables

@@ -15,6 +15,7 @@ export function createApp() {
   const app = express();
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
+  app.use('/dashboard', express.static(path.resolve(process.cwd(), 'src/public/dashboard')));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
   app.use(authMiddleware);
   app.use('/api', router);

@@ -1,0 +1,29 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, Arial, sans-serif; background: #0b1020; color: #e8ecf3; }
+input, button { font: inherit; }
+button { cursor: pointer; border: 0; border-radius: 10px; padding: 10px 14px; background: #4f7cff; color: white; }
+button.secondary { background: #25304f; }
+button.danger { background: #d64c4c; }
+input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #324164; background: #111933; color: #fff; }
+.app { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+.sidebar { border-right: 1px solid #202c49; padding: 16px; display: flex; flex-direction: column; gap: 16px; background: #0d1428; }
+.content { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.brand h1, .topbar h2 { margin: 0; }
+.brand p, .muted { color: #9dafd3; margin: 4px 0 0; }
+.card { background: #121b33; border: 1px solid #263554; border-radius: 16px; padding: 16px; }
+.grow { flex: 1; min-height: 0; }
+.list { display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow: auto; }
+.project-item { padding: 12px; border-radius: 12px; background: #16213f; border: 1px solid transparent; cursor: pointer; }
+.project-item.active { border-color: #4f7cff; background: #1b2950; }
+.section-title { font-weight: 700; margin-bottom: 12px; }
+.topbar, .toolbar, .form-row { display: flex; gap: 10px; }
+.topbar { justify-content: space-between; align-items: center; }
+.toolbar { min-width: 420px; }
+.grid.two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.form-row { margin-bottom: 10px; }
+.logs { background: #0a1121; border-radius: 12px; padding: 12px; min-height: 220px; white-space: pre-wrap; overflow: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #22304f; }
+a { color: #8bb2ff; }
+.code-chip { display: inline-block; background: #202f54; color: #cfe0ff; padding: 4px 8px; border-radius: 999px; font-size: 12px; }
+@media (max-width: 1000px) { .app { grid-template-columns: 1fr; } .toolbar, .topbar, .form-row, .grid.two { display: flex; flex-direction: column; min-width: 0; } }

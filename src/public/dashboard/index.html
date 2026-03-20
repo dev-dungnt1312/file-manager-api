@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Manager Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>File Manager</h1>
+        <p>Dashboard</p>
+      </div>
+
+      <div class="card">
+        <label>API Base URL</label>
+        <input id="apiBaseUrl" placeholder="https://host/file-manager/api" />
+
+        <label>API Token</label>
+        <input id="apiToken" placeholder="x-api-token" type="password" />
+
+        <button id="saveConfigBtn">Save config</button>
+        <button id="loadProjectsBtn" class="secondary">Load projects</button>
+      </div>
+
+      <div class="card grow">
+        <div class="section-title">Projects</div>
+        <div id="projectList" class="list"></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h2 id="projectTitle">No project selected</h2>
+          <div id="projectMeta" class="muted"></div>
+        </div>
+        <div class="toolbar">
+          <input id="currentPath" placeholder="path" />
+          <button id="openPathBtn" class="secondary">Open</button>
+          <button id="upBtn" class="secondary">Up</button>
+          <button id="refreshBtn">Refresh</button>
+        </div>
+      </header>
+
+      <section class="grid two">
+        <div class="card">
+          <div class="section-title">Actions</div>
+
+          <div class="form-row">
+            <input id="mkdirPath" placeholder="folder/path" />
+            <button id="mkdirBtn">Create folder</button>
+          </div>
+
+          <div class="form-row">
+            <input id="uploadPath" placeholder="upload target path, e.g. docs/file.txt" />
+            <input id="uploadFile" type="file" />
+            <button id="uploadBtn">Upload</button>
+          </div>
+
+          <div class="form-row">
+            <input id="moveFrom" placeholder="from path" />
+            <input id="moveTo" placeholder="to path" />
+            <button id="moveBtn">Move</button>
+          </div>
+
+          <div class="form-row">
+            <input id="copyFrom" placeholder="from path" />
+            <input id="copyTo" placeholder="to path" />
+            <button id="copyBtn">Copy</button>
+          </div>
+
+          <div class="form-row">
+            <input id="deletePath" placeholder="path to delete" />
+            <button id="deleteBtn" class="danger">Delete</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Logs</div>
+          <pre id="logs" class="logs"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Files</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Size</th>
+              <th>Last modified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fileTableBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
