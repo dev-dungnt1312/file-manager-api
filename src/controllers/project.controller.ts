@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { projectService } from '../services/project.service.js';
 import type { StorageConfig } from '../types/storage.js';
+import { redactSecrets } from '../utils/redact.js';
 
 const localConfigSchema = z.object({
   rootDir: z.string().min(1),
@@ -54,7 +55,7 @@ function parseStorageConfig(driver: 'local' | 's3' | 'minio' | 'ftp', storageCon
 
 export const projectController = {
   list(_req: Request, res: Response) {
-    return res.json({ success: true, data: projectService.list() });
+    return res.json({ success: true, data: redactSecrets(projectService.list()) });
   },
 
   create(req: Request, res: Response) {
@@ -63,12 +64,12 @@ export const projectController = {
       ...payload,
       storageConfig: parseStorageConfig(payload.driver, payload.storageConfig),
     });
-    return res.status(201).json({ success: true, data: project });
+    return res.status(201).json({ success: true, data: redactSecrets(project) });
   },
 
   get(req: Request, res: Response) {
     const project = projectService.getById(asString(req.params.projectId));
-    return res.json({ success: true, data: project });
+    return res.json({ success: true, data: redactSecrets(project) });
   },
 
   update(req: Request, res: Response) {
@@ -77,6 +78,6 @@ export const projectController = {
       ...payload,
       storageConfig: parseStorageConfig(payload.driver, payload.storageConfig),
     });
-    return res.json({ success: true, data: project });
+    return res.json({ success: true, data: redactSecrets(project) });
   },
 };

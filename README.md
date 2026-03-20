@@ -34,6 +34,8 @@ All file listing, stat, and content reads are resolved directly from the storage
 - API token auth
 - Bun-compatible runtime
 - End-to-end CRUD test script for local / MinIO / FTP
+- Swagger UI at `/docs`
+- Secret masking in project API responses
 
 ---
 
@@ -104,6 +106,9 @@ bun run start
 
 Default server:
 - `http://127.0.0.1:3000`
+
+Swagger UI:
+- `http://127.0.0.1:3000/docs`
 
 ---
 
@@ -411,7 +416,8 @@ What it tests:
   - upload to new path
   - delete old file
 - MinIO is handled via the S3-compatible driver
-- The current API returns full project storage config as stored; if you expose this publicly in production, add secret masking first
+- Project API responses now mask common secret fields like `password`, `accessKeyId`, `secretAccessKey`, `token`
+- Internal runtime still uses the real values from SQLite for driver execution
 
 ---
 

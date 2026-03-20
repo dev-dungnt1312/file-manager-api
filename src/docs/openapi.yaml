@@ -1,0 +1,300 @@
+openapi: 3.0.3
+info:
+  title: File Manager API
+  version: 1.0.0
+  description: |
+    Multi-project file manager API using Bun + Express + SQLite.
+
+    Each project can use a different backend driver:
+    - local
+    - s3
+    - minio
+    - ftp
+servers:
+  - url: http://127.0.0.1:3000
+components:
+  securitySchemes:
+    ApiToken:
+      type: apiKey
+      in: header
+      name: x-api-token
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        driver:
+          type: string
+          enum: [local, s3, minio, ftp]
+        storageConfig:
+          type: object
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    MovePayload:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+    MkdirPayload:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      security:
+        - ApiToken: []
+      responses:
+        '200':
+          description: OK
+  /api/projects:
+    get:
+      summary: List projects
+      security:
+        - ApiToken: []
+      responses:
+        '200':
+          description: Project list
+    post:
+      summary: Create project
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '201':
+          description: Project created
+  /api/projects/{projectId}:
+    get:
+      summary: Get one project
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project detail
+    put:
+      summary: Update project
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '200':
+          description: Project updated
+  /api/projects/{projectId}/storage/health:
+    get:
+      summary: Storage health check
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Storage healthy
+  /api/projects/{projectId}/files:
+    get:
+      summary: List files/directories
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List result
+    delete:
+      summary: Delete file or directory
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+  /api/projects/{projectId}/files/meta:
+    get:
+      summary: Read file metadata
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Metadata result
+  /api/projects/{projectId}/files/content:
+    get:
+      summary: Stream file content
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File content stream
+  /api/projects/{projectId}/files/upload:
+    post:
+      summary: Upload file
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Uploaded
+  /api/projects/{projectId}/files/mkdir:
+    post:
+      summary: Create directory
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MkdirPayload'
+      responses:
+        '201':
+          description: Directory created
+  /api/projects/{projectId}/files/move:
+    post:
+      summary: Move file
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovePayload'
+      responses:
+        '200':
+          description: File moved
+  /api/projects/{projectId}/files/copy:
+    post:
+      summary: Copy file
+      security:
+        - ApiToken: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovePayload'
+      responses:
+        '200':
+          description: File copied
+security:
+  - ApiToken: []
