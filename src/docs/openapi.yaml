@@ -11,7 +11,10 @@ info:
     - minio
     - ftp
 servers:
+  - url: https://openclaw.dungnt1312.me/file-manager
+    description: Public HTTPS via nginx
   - url: http://127.0.0.1:3000
+    description: Local development
 components:
   securitySchemes:
     ApiToken:
